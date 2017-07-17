@@ -1,0 +1,641 @@
+
+
+[
+
+
+    { 
+        "title" : "ORDS tips",
+
+        
+        
+        
+        "tags": [
+        
+            "ords",
+            
+        
+            "xml",
+            
+        
+            "mime_types",
+            
+        
+            "oracle"
+            
+        
+        ],
+        "href" : "2017/ords/index.html",
+        "content" : "XML over ORDSTurns out you can emit XML via ORDS. I'll assume you have a working ORDS install and the schema is already enabledBEGIN  ORDS.DEFINE_MODULE(      p_module_name    =&gt; 'reporting',      p_base_path      =&gt; '/reporting/',      p_items_per_page =&gt;  0,      p_status         =&gt; 'PUBLISHED',      p_comments       =&gt; NULL);        ORDS.DEFINE_TEMPLATE(      p_module_name    =&gt; 'reporting',      p_pattern        =&gt; 'hello_xml',      p_priority       =&gt; 0,      p_etag_type      =&gt; 'HASH',      p_etag_query     =&gt; NULL,      p_comments       =&gt; NULL);  ORDS.DEFINE_HANDLER(      p_module_name    =&gt; 'reporting',      p_pattern        =&gt; 'hello_xml',      p_method         =&gt; 'GET',      p_source_type    =&gt; 'plsql/block',      p_items_per_page =&gt;  0,      p_mimes_allowed  =&gt; '',      p_comments       =&gt; NULL,      p_source         =&gt; 'DECLARE    l_clob   CLOB;BEGIN    SELECT        ''&lt;xml&gt;hello world&lt;/xml&gt;''    INTO        l_clob    FROM        dual;    owa_util.mime_header(        ccontent_type   =&gt; ''text/xml'',        bclose_header   =&gt; true,        ccharset        =&gt; ''ISO-8859-4''    );    htp.print(l_clob);END;'      );  COMMIT; END;$ curl -v http://oracle.rocks:8080/ords/scott/reporting/mime_works* About to connect() to oracle.rocks port 8080 (#0)*   Trying 1.2.3.4... connected* Connected to oracle.rocks (1.2.3.4) port 8080 (#0)&gt; GET /ords/scott/reporting/mime_works HTTP/1.1&gt; User-Agent: curl/7.19.7 (x86_64-redhat-linux-gnu) libcurl/7.19.7 NSS/3.27.1 zlib/1.2.3 libidn/1.18 libssh2/1.4.2&gt; Host: oracle.rocks:8080&gt; Accept: */*&gt;&lt; HTTP/1.1 200 OK&lt; Content-Type: text/xml; charset=ISO-8859-4&lt; ETag: &quot;WaloI8WDL3PY2G0ZN6+I8C+c0FxVaUBuDc/v7LKXTpE6dTuJR1s2bLF/0hqW2fVzaXNYpr9TFXqucyoq6dO2Xw==&quot;&lt; Transfer-Encoding: chunked&lt;&lt;xml&gt;hello world&lt;/xml&gt;* Connection #0 to host oracle.rocks left intact* Closing connection #0Important item of note is the mime header, it's important that bclose_header is always true because this is literally the last HTTP header before the response body. Setting this to false will result in no data.ReferencesORACLE-BASE"
+    },
+
+
+    { 
+        "title" : "SSIS Variable Dispenser Template",
+
+        
+        
+        
+        "tags": [
+        
+            "ssis",
+            
+        
+            "bids",
+            
+        
+            "template"
+            
+        
+        ],
+        "href" : "2017/variable-dispenser/index.html",
+        "content" : "I don't write enough SSIS script blob tasks to commit this to memory. This is the safest way to access variables without inadvertantly locking them after a crash.public void Main(){    Variables vars = null;    try    {        Dts.VariableDispenser.LockForWrite(&quot;User::strWritable&quot;);        Dts.VariableDispenser.LockForRead(&quot;User::strReadable&quot;);        Dts.VariableDispenser.GetVariables(ref vars);        vars[&quot;User::strWritable&quot;].Value = vars[&quot;User::strReadable&quot;].Value.ToString();        Dts.TaskResult = (int)ScriptResults.Success;    }    catch (Exception)    {        Dts.TaskResult = (int)ScriptResults.Failure;    }    finally    {        vars.Unlock();    }}"
+    },
+
+
+    { 
+        "title" : "Add support for tags to Cobalt",
+
+        
+        
+        
+        "tags": [
+        
+            "cobalt",
+            
+        
+            "tags",
+            
+        
+            "taxonomies",
+            
+        
+            "categories"
+            
+        
+        ],
+        "href" : "2017/cobalt-tags/index.html",
+        "content" : "A while back I started adding a new front matter attribute to all my postscalled tags. I initially did this to improve my site search indexing (you canread about that here).After spending some time thinking about how to add tags to the site, and Ithink I've come up with a reasonable solution.The biggest problem with tags is that you can't easily codegen the templatelike the one I used for the documents collectionfeed to seed the lunrindexer.The code for the tag template looks like this.&lt;h1&gt;Posts tagged as {{ filter_tag }}&lt;/h1&gt;&lt;ul&gt;{% for post in posts reversed %}    {% assign tags = post.tags | replace: &quot; &quot;, &quot;&quot; |  split: &quot;,&quot; %}    {% for tag in tags %}        {% if tag == filter_tag %}            &lt;li&gt;&lt;a href=&quot;/{{post.path}}&quot;&gt;{{ post.title }}&lt;/a&gt;&lt;/li&gt;            {% break %}        {% endif %}    {% endfor %}{% endfor %}&lt;/ul&gt;The code is fairly trivially, grab the tags attribute turn it into an arrayof tags and then loop over it and add a link if the tag is found.If you were to create a template per tag, there's a risk of code duplication.After that, it's only a matter of time, when you &quot;fix&quot; one template, but forgetapply to the others.You could mitigate against this by recreating all the tag pages at build time.I may revisit this solution at a later date to see if there's any otherbenefits that might have been overlooked.In the end I decided to use the include liquid tag to reuse the tag templatecode, again I got the idea from Johann's excellent blogwhere he broke up his default layout into components using include. One thingto note about using the include tag is that you shouldn't include a frontmatter section otherwise this will also be rendered.tags/cobalt.liquidfront matterextends: default.liquidtitle: booyaa's boggy bloggypath: tags/cobalt/comment: collection of cobalt related posts---The only item of note here is the path, I've decided to utilise tags as asub-path. I've not created a index page for this sub-path, so it'll give a 404for now.content{% assign filter_tag = &quot;cobalt&quot; %}{% include &quot;_layouts/_tag.liquid&quot; %}The tag page content literally define the tag filter that will be used by thetags template and then includes the tags template.The end result can be found here. I should add that, I'm stillthinking about a way to add this link within related posts, but I think that'sanother problem altogether! The source code can be foundhere."
+    },
+
+
+    { 
+        "title" : "Setting up exercism python track with Visual Studio Code",
+
+        
+        
+        
+        "tags": [
+        
+            "python",
+            
+        
+            "exercism",
+            
+        
+            "pylint",
+            
+        
+            "pytest",
+            
+        
+            "pep8",
+            
+        
+            "vscode"
+            
+        
+        ],
+        "href" : "2017/exercism-python/index.html",
+        "content" : "Here's a fairly good setup for getting the python track of exercism workingwith virtual env and Visual Studio Code.virtual envcreate one, and install the following packages:pip install pylint autopep8 # alwayspip install pytest pytest-cache # minimumpip install pytest-pep8 pdb # bonusvisual studio codeDon Jayanmanne’s Python extensionunit testing (using virtualenv/pyvenv)Configure using Run All Unit Tests  which will addsettings.json{    &quot;python.unitTest.pyTestArgs&quot;: [        &quot;.&quot;    ],    &quot;python.unitTest.pyTestEnabled&quot;: true}ignore certain pylint warningssettings.json{    &quot;python.linting.pylintArgs&quot;: [        &quot;--disable=C0111&quot;     ]}setup command line toolsfirst time setupinstall command line tools so you can launch code using code .activate your virtual envnav to your exercism execise path (don’t open the main python folder, code can only handle a single exercise.code .verify virtual environment is being used trigger command pallet and run Python: Select Interpreter Workspace (this doesn’t work at the moment since downgrading to 3.5.2check that intellisense and linting are workingsetup unit testsuseful http://exercism.io/languages/python/testsQuestionshow do i get code to run unit tests on saveenable pdb on unit test failure"
+    },
+
+
+    { 
+        "title" : "python tips",
+
+        
+        
+        
+        "tags": [
+        
+            "python",
+            
+        
+            "homebrew",
+            
+        
+            "raspbian"
+            
+        
+        ],
+        "href" : "2017/python/index.html",
+        "content" : "A random collection of Python tips, I also write Python code in MacOS andraspbian so you'll see tips for those platforms.Docker images (python related)httpbin - docker run -it --rm -p 8000:8000 citizenstig/httpbinjupyter notebook - docker run -it --rm -p 8888:8888 jupyter/all-spark-notebookpylint messagesto suppress # pylint: disable=invalid-nameto see a list pylint --list-msgs | grep -i W05Returning something useful from a classstr methodclass foo:    def __str__(self):        return “something rendered nicely”SimpleHTTPServer for python 3python3 -m http.server 8080TabulatingPanda’s probably a better fit because it can generate all kinds of tables (markdown, ascii, html etc)If you need something quick use tabulate.&gt;&gt;&gt; list(zip(*table2))[(1, 'A', '@'), (2, 'B', '$'), (3, 'C', '!')]&gt;&gt;&gt; print(tabulate([list(x) for x in zip(*table2)], headers=[&quot;i1&quot;,&quot;i2&quot;,&quot;i3&quot;]))  i1  i2    i3----  ----  ----   1  A     @   2  B     $   3  C     !&gt;&gt;&gt; table2[[1, 2, 3], ['A', 'B', 'C'], ['@', '$', '!']]versioningdowngrading to python 3.5.2 in homebrewbrew install https://raw.githubusercontent.com/Homebrew/homebrew-core/f377ed1a1b568d5624164146ec7d6855fe175826/Formula/python3.rbpython3 -Vbrew pin python3switching back to 3.6.0brew unpin python3brew switch python3 3.6.0updating python3 pypieasy_install3 -U pippython -m pip install —upgrade pip # betterupgrading pip (python2)pip install —upgrade pippip install —upgrade setuptoolsif it fails (pip’s a module, avoid using this unless you’re using debian)apt-get remove pipeasy_install pippip install —upgrade pip"
+    },
+
+
+    { 
+        "title" : "youtube-dl gems",
+
+        
+        
+        
+        "tags": [
+        
+            "youtube-dl"
+            
+        
+        ],
+        "href" : "2017/youtube-dl/index.html",
+        "content" : "A handy collection of youtube-dl incantations, remember it's not just foryoutube-dl! There's plenty more, but these are the one use I use on a dailybasis.If you're a windows users, these should work on your platform provided you change any directory references from / to \\. And remove \\ and concatenate the entire incantation into a single line.youtube-dl -F VIDEO_URL # see all video formats available for a given urlyoutube-dl -f mp4 VIDEO_URL # download specific formatyoutube-dl -f mp4 -o '%(playlist)s/%(playlist_index)s - %(title)s.%(ext)s' \\     'YOUTUBE_PLAYLIST_URL' # downloads playlist in number orderyoutube-dl --playlist-items ITEM_SPEC 'YOUTUBE_PLAYLIST_URL' \\    # download items from a playlist where ITEM_SPEC is 1,2,3 or 1-3,4,9-100 youtube-dl --verbose --username PS_USER --password PS_PASS \\    --sleep-interval 200 -o &quot;%(playlist)s/%(chapter_number)s.%(chapter)s/%(playlist_index)s.%(title)s.%(ext)s&quot; \\    --restrict-filenames PLURALSIGHT_URL \\    # where PS_USER and PS_PASS are your pluralsight credentials"
+    },
+
+
+    { 
+        "title" : "Adding an archive page to your Cobalt blog",
+
+        
+        
+        
+        "tags": [
+        
+            "cobalt",
+            
+        
+            "liquid"
+            
+        
+        ],
+        "href" : "2017/adding-an-archive/index.html",
+        "content" : "To avoid slowing down the index page, there's a point where you need to limithow many blog posts you want to appear on screen. This in turn presents anotherproblem, how do you then provide a way to display older posts? Enter an archivepage!archive.liquidfront matterextends: default.liquidtitle: archivepath: /archiveroute: archive---templateThis is a quick work around until I've had a good think about a way to organise the archive.&lt;h2&gt;2017&lt;/h2&gt;&lt;ul&gt;{% for post in posts %}{% assign year = post.path | truncate: 4, &quot;&quot; %}{% if year == &quot;2017&quot; %}  &lt;li&gt;&lt;a href=&quot;/{{ post.path }}&quot;&gt;{{ post.title }}&lt;/a&gt; - {{ post.content | strip_html | truncatewords: 25, '...' }}&lt;/li&gt;{% endif %}{% endfor %&lt;/ul&gt;The template is placed in the root of your cobalt source dirctory. Yes it's abit of hack, but I'm still playing around with the format. I think eventually Imay even turn the archiving into a code generated process during build time."
+    },
+
+
+    { 
+        "title" : "Flashback, what did this data look like previously?",
+
+        
+        
+        
+        "tags": [
+        
+            "oracle",
+            
+        
+            "flashback",
+            
+        
+            "lsd"
+            
+        
+        ],
+        "href" : "2017/flashback/index.html",
+        "content" : "I'm only scratching the surface of what you can do with flashbacks in Oracle.Our DBAs are absolute ninjas when it comes to using this witchcraft from Oracle.The example below lets us look at a data dictionary for materialized refreshgroups and what the values were an hour ago.CLEAR SCREENCOL name FORMAT a30COL rname FORMAT a30SELECT    name,    rnameFROM    all_refresh_children AS OF TIMESTAMP ( trunc(SYSDATE - 1 / 24) )WHERE    rname = 'RFG_GROUP2';where:1 / 24 is an hour ago36 / 24 is yesterday an hour and half ago"
+    },
+
+
+    { 
+        "title" : "SQL Developer's new format hints",
+
+        
+        
+        
+        "tags": [
+        
+            "sqldeveloper",
+            
+        
+            "csv",
+            
+        
+            "format"
+            
+        
+        ],
+        "href" : "2017/sql-developer-format-hints/index.html",
+        "content" : "One of my favourite cool features in SQL Developer is the ability to turn a sqlquery output into an entirely different format. It doesn't even requirebreaking out the import/export wizard.SPOOL C:\\TEMP\\foobar.csvSELECT /*csv*/ *  FROM foo  LEFT  JOIN bar    ON foo.id = bar.id WHERE foo.name LIKE '%HURR%';  SPOOL OFFComplete list of formatsSELECT /*csv*/ * FROM scott.emp;SELECT /*xml*/ * FROM scott.emp;SELECT /*html*/ * FROM scott.emp;SELECT /*delimited*/ * FROM scott.emp;SELECT /*insert*/ * FROM scott.emp;SELECT /*loader*/ * FROM scott.emp;SELECT /*fixed*/ * FROM scott.emp;SELECT /*text*/ * FROM scott.emp;Full details and source can be  here."
+    },
+
+
+    { 
+        "title" : "Bitmasks in SQL",
+
+        
+        
+        
+        "tags": [
+        
+            "oracle",
+            
+        
+            "sql",
+            
+        
+            "bitmasks"
+            
+        
+        ],
+        "href" : "2017/bitmasks-sql/index.html",
+        "content" : "bitmasks are really handy way to express predicates without becoming overlyverbose with parens and logical operators (AND and OR). Assume we have thefollowing table.| what        | wanted ||-------------|--------|| need me too | 4      || alpha       | 1      || beta        | 2      |with data as(select 'appears_in_both', 4 as wanted from dualunion allselect 'alpha', 1 as wanted from dualunion allselect 'beta', 2 as wanted from dual)...Get &quot;need me too&quot; and &quot;alpha&quot; together...select * from datawhere bitand(wanted, 5) &lt;&gt; 0; -- (4 + 1)Get &quot;need me too&quot; and &quot;beta&quot; together...select * from datawhere bitand(wanted, 6) &lt;&gt; 0; -- (4 + 2)"
+    },
+
+
+    { 
+        "title" : "Dirty Dynamic SQL",
+
+        
+        
+        
+        "tags": [
+        
+            "dynamic",
+            
+        
+            "sql",
+            
+        
+            "danger",
+            
+        
+            "oneliners",
+            
+        
+            "codegen"
+            
+        
+        ],
+        "href" : "2017-dirty-dynamic-sql/index.html",
+        "content" : "Not all dynamic sql is strictly for immediate execution, nor is it dirty (Ineeded aninteresting title). I learnt this tricks from my friend at work, he'sa big believer of using sql to code generate more sql.Altering column lengthYou'll still get an error when running the generated sql if you try to shrink a column.SELECT 'ALTER TABLE ' || table_name || ' MODIFY ' || column_name || ' VARCHAR2(' || CASE column_name  WHEN 'FOO' THEN '10'  ELSE '20' END || ');' AS sql  FROM user_tab_columns  WHERE column_name IN ( 'FOO','BAR')   AND table_name IN (SELECT table_name FROM user_tables)      AND NOT regexp_like(table_name, '_(NEW|BAK)$') -- exclude backupsInserting (hurr) output from dynamic sqlNormally you'd expect to get away with using something like SELECT blah INTO v_foo, but with dynamic sql you need place the INTO in the EXECUTE IMMEDIATE statement.SET SERVEROUTPUT ONDECLARE  v_sql VARCHAR2(8000);  v_count NUMBER;  CURSOR c_tables      IS  SELECT table_name    FROM user_tables;BEGIN  FOR rec in c_tables  LOOP    v_sql := 'SELECT count(*) FROM ' || rec.table_name;    EXECUTE IMMEDIATE v_sql INTO v_count;        DBMS_OUTPUT.put_line(rec.table_name || ' has ' || v_count);  END LOOP;END;/tags: rowcount , row , countUsing substution variablesclear screenset serveroutput ondeclare  cursor c_tables is select table_name from user_tables;  v_data VARCHAR2(2000);  v_sql VARCHAR2(2000);  v_stuff VARCHAR2(50) := '&amp;1'; -- try entering MAX(DATADATE) or COUNT(*) begin  for rec in c_tables  loop    v_sql := 'SELECT TO_CHAR(' || v_stuff || ') FROM ' || rec.table_name;        begin      execute immediate v_sql into v_data;      dbms_output.put_line(rec.table_name || ': ' || v_data);        exception      when others then        dbms_output.put_line('failed to run: ' || v_sql);        raise;    end;    end case;  end loop;end;/One linersGrantsSELECT 'GRANT ' || privilege || ' ON &quot;' || GRANTOR ||'&quot;.&quot;' || TABLE_NAME ||        '&quot; TO &quot;' || GRANTEE || '&quot;;' FROM dba_tab_privs WHERE grantor = 'FOO'AND grantee = 'BAR';Recreating synonyms as sysselect 'CREATE OR REPLACE SYNONYM &quot;' || OWNER || '&quot;.&quot;' || SYNONYM_NAME ||        '&quot; FOR &quot;' || TABLE_OWNER || '&quot;.&quot;' || TABLE_NAME || '&quot;;' from dba_synonyms where table_owner = 'FOO';"
+    },
+
+
+    { 
+        "title" : "When XML attacks!",
+
+        
+        
+        
+        "tags": [
+        
+            "oracle",
+            
+        
+            "xmltype",
+            
+        
+            "xml",
+            
+        
+            "extractvalue"
+            
+        
+        ],
+        "href" : "2017/when-xml-attacks/index.html",
+        "content" : "At some point in your xml wrangling career you will hit an node whose data istoo big for Oracle's EXTRACTVALUE (I think the upper limit is 4000characters) and get this lovely message.ORA-01706: user function result value was too large01706. 00000 -  &quot;user function result value was too large&quot;To mitigate this problem, you need to switch to XMLTABLE and it's usefulPASSING attribute:SELECT    fix.biggie AS notoriousFROM    source_table_with_xmltype_column o,    XMLTABLE ( '/*'        PASSING o.xml_field COLUMNS            biggie VARCHAR2(4000) PATH 'substring(/path/to/offending/item/text(),1,3999)'    ) fix;The gist of the fix is to use xpath to truncate the text value before it'shanded off to Oracle. Trying to cast the xmltype column as a varchar2(4000)will not fix it because the problem happens as extractvalue is parsing thenode.Items of noteXML ( '/*' - how to specify the root of an xml documentbiggie VARCHAR2(4000) PATH 'substring(/path/to/offending/item/text(),1,3999)'how to get the text from an xpath and truncate it to 4000 chars.sources:XMLTABLE : Convert XML Data into Rows and Columns using SQLSO (Answer): How to use xmltable in oracle?SO (Answer): Oracle SQL - Extracting clob value from XML with repeating nodes"
+    },
+
+
+    { 
+        "title" : "Bind vs Substitution variables",
+
+        
+        
+        
+        "tags": [
+        
+            "oracle",
+            
+        
+            "plsql",
+            
+        
+            "variables",
+            
+        
+            "bind",
+            
+        
+            "substitution"
+            
+        
+        ],
+        "href" : "2017/bind-vs-substitution/index.html",
+        "content" : "I always have difficulty remember the difference between these type ofvariables. Although now, that I've started doing a lot of ORDS related work,the difference is become more apparent.Also substitution variables are really a binding to a user variable.Bind variablesPROMPT bind variables are...VAR foo VARCHAR2SET SERVEROUTPUT ONBEGIN  :FOO := 'in PL/SQL blocks';  DBMS_OUTPUT.PUT_LINE('mostly used...');END;/SET SERVEROUTPUT OFFPRINT foooutputbind variables are...PL/SQL procedure successfully completed.mostly used...FOO---in PL/SQL blocksSubstitution variablesPROMPT Where as substitution variable are...DEFINE FOO = 'useful in SQL scripts'SET VERIFY OFFSELECT '&amp;FOO' AS BAR FROM DUAL;SET VERIFY ONoutputWhere as user variable are...BAR                 ---------------------useful in SQL scriptsTo be explict, use bind vars to interact with PL/SQL blocks and substituionvariables could be used anywhere. The only downside to substituion variables isthat you can't DEFINE a variable with another user variable.Also you can break substitution variables, if there's an errant SET DEFINE OFF,still not sure how you could test for this? Perhaps using default valuesand testing for it i.e. like SQLCMD variables.Further reading:Literals, Substitution Variables and Bind VariablesPL/SQL 101 : Substitution vs. Bind Variables"
+    },
+
+
+    { 
+        "title" : "PL/SQL script to query a refcursor",
+
+        
+        
+        
+        "tags": [
+        
+            "cursors",
+            
+        
+            "oracle",
+            
+        
+            "plsql"
+            
+        
+        ],
+        "href" : "2017/plsql-script-cursors/index.html",
+        "content" : "This will probably work in pipelined functions or packages too. Note the use ofthe bind variable to link the PL/SQL script variables to the out refcursor.SET SERVEROUTPUT ONCLEAR SCREENVAR P_NAME CHARVAR P_TABLES REFCURSORDECLARE  PROCEDURE table_get(p_name IN VARCHAR2, p_tables OUT SYS_REFCURSOR)  AS  BEGIN    OPEN p_tables      FOR        SELECT *           FROM user_tables          WHERE TABLE_NAME LIKE P_NAME;  END;BEGIN    :P_NAME := '%REQ%';  table_get(:P_NAME, :P_TABLES);END;/PRINT P_TABLES"
+    },
+
+
+    { 
+        "title" : "Defensive coding in SQL",
+
+        
+        
+        
+        "tags": [
+        
+            ""
+            
+        
+        ],
+        "href" : "2017/defensive-coding-sql/index.html",
+        "content" : "Always wrap ON clauses in parens to avoid predicates being deletedaccidentally. The following code will scream if you delete the AND clause.SELECT *  FROM foo  LEFT JOIN bar    ON ((foo.id = bar.id)        AND (foo.fizz = bar.buzz))Where as the following won't.SELECT *  FROM foo  LEFT JOIN bar    ON foo.id = bar.id        AND foo.fizz = bar.buzz"
+    },
+
+
+    { 
+        "title" : "Collapsible Sections in HTML",
+
+        
+        
+        
+        "tags": [
+        
+            "html",
+            
+        
+            "github"
+            
+        
+        ],
+        "href" : "2017/collapsible-sections/index.html",
+        "content" : "But first a demo...Works great in GitHub! (click me)  Dipshit with a nine-toed woman. Dolor sit amet, consectetur adipiscing elit praesent ac magna. You don’t go out and make a living dressed like that in the middle of a weekday. Justo pellentesque ac lectus quis. Yeah. Roadie for Metallica. Speed of Sound Tour. Elit blandit fringilla a ut turpis praesent felis. Keep your ugly fucking goldbricking ass out of my beach community! Ligula, malesuada suscipit malesuada non, ultrices non urna sed orci ipsum, placerat id. Code&lt;details&gt;  &lt;summary&gt;Click to expand...&lt;/summary&gt;  &lt;p&gt;Imagine this is the entire text of War and Peace.&lt;/p&gt;&lt;/details&gt; "
+    },
+
+
+    { 
+        "title" : "See hidden files in Finder",
+
+        
+        
+        
+        "tags": [
+        
+            "mac",
+            
+        
+            "finder"
+            
+        
+        ],
+        "href" : "2017/hidden-files/index.html",
+        "content" : "If you search for how to do this, you get a lot of nonsense involving messing with defaults write and horrific applescript bodges.CMD + SHIFT + .That's command key, shift and full stop (period) pressed at the same time."
+    },
+
+
+    { 
+        "title" : "Using pre-built lunr indexes",
+
+        
+        
+        
+        "tags": [
+        
+            "cobalt",
+            
+        
+            "search",
+            
+        
+            "lunr"
+            
+        
+        ],
+        "href" : "2017/prebuilt-lunr-indexes/index.html",
+        "content" : "I've implemented pre-built indexes vs. on demand i.e. generating them when thesearch page is being loaded. I'm not entirely happy with the solution yet forthe following reasons:Additional requirements - pre-built indexes require node.js to generate theindexes offline.Documents collection - the original search page still depends on the reffield (the link to the relevant blog post) and title because the lunr indexdoesn't provide this. The content field is now surplus to requirements oncethe site has been built, but it is needed during index generation.Added complexity - I know adding node.js isn't a big ask, but it has resultedin a new makefile. And until I update my travis config, pre-built indexes onlyget created when I've written a new article.One novel approach to solving both these problems is to utilise a V8 crate andrun lunr index natively. This is the approach adopted by the lunr indexerfor middleman (a static site generate written inruby).Since we're not looking at native Cobalt solutions i.e. using liquid templates,another approach would be to modify the node.js script used to pre-build theindex, to parse the content natively and remove the need for the lunr.liquidtemplate. The script would also need to generate the documents collectionthat's still used by the search page minus the content field.The code changes can be found in the following commits:node.js script - used to pre-build the index, mostly cribbed from the lunrguide on that subject.makefile and search template - the makefile is cribbed from Matthias Endler's own version used tobuild his Cobalt site. The search template adds the prebuilt index to the list ofassets to be loaded when the page is loaded."
+    },
+
+
+    { 
+        "title" : "Useful git commmands",
+
+        
+        
+        
+        "tags": [
+        
+            "git"
+            
+        
+        ],
+        "href" : "2017/useful-git-commands/index.html",
+        "content" : "Commit logsNow that I've started adding useful commit messagesit's really use to make sense of my commits, more so when you use single linemode.$ git log --oneline3b04513 doc: add 'comment' tag to explain purpose of new templates86cc454 feat: add tags to search7286f90 feat: add twitter share button24cfc85 feat: add todo20d28d7 chore: remove manually generated lunr index...Started working on a feature/fix, but forgot you we're in master?This assumes you haven't committed your changes...git checkout -b new_branch# add and commit your changesgit checkout master# clean up any files you don't want to commit...Sync your repo with the upstreamSetup a remote to the upstream.git remote add upstream &lt;path/to/upstream&gt; # e.g. https://github.com/cobalt-org/liquid-rust.gitNow sync!git fetch upstream  # gets branches and commits from upstreamgit checkout master # switch to your fork’s master branch (if you're not already there)git merge upstream/master # syncgit push -u origin master # update remote repo of your forkThis can also be used to push your GitHub repos to other hosted SCM providersi.e. GitLab and BitBucketSubmodulesYou want to add repo Bar to your own repo Foogit submodule add https://path/to/barTo pull the changes ingit submodule initTo do this at clone timegit clone --recursive https://repo/contain/submodulesTo refresh the submodule (assuming the dir name is the same as the submodule)git submodule update --remote submodule_namePossible gotcha if you refresh your submodule, you will need to commit newversion into your own repo.TagsN.B. Tags when push to GitHub become releases!to taggit tag v1.0.0to see what tag we're ongit tagto pushgit push --tagsto pullgit fetch --tags"
+    },
+
+
+    { 
+        "title" : "Adding search to your cobalt site - Part Two",
+
+        
+        
+        
+        "tags": [
+        
+            "cobalt",
+            
+        
+            "github",
+            
+        
+            "search",
+            
+        
+            "lunr",
+            
+        
+            "liquid"
+            
+        
+        ],
+        "href" : "2017/adding-search-to-your-cobalt-site-part-two/index.html",
+        "content" : "This will be a two part post, where I detail the steps it took to enablesearch on my Cobalt site.As you may have gathered in part one,creating manual document collections is a bit of a chore, and can be easily doneusing the liquid templating engine.lunr.liquidfront mattertitle: lunr indexpath: /js/lunr_docs.json---The item of note here, is the path which Cobalt will use to create the lunrdocument collection.content{% assign idx = 0 %}{% assign post_count = posts | size %}[{% for post in posts %}{% assign idx = idx | plus: 1 %}&quot;,    { {{ post.title }}&quot;,        &quot;title&quot; : &quot;{{ post.path }}        &quot;content&quot; : &quot;{{ post.content | strip_html | strip_newlines                                      | replace: &quot;\\&quot;, &quot;\\\\&quot; }}&quot;        &quot;href&quot; : &quot;{% endif %},{% if idx &lt; post_count %}    }{% endfor %}]The only real difference here between a blog index is that I'm tracking the lastpost using an index so I can omit a trailing comma.Don't forget to remove the manually generated document collection(lunr_docs.json) from the assets directory for javascript files (js/) , asthis caught me out and made me wonder why the index wasn't being updated.Updates2017-06-21 - Change references to the lunr index to the lunr documentcollection."
+    },
+
+
+    { 
+        "title" : "Adding search to your cobalt site - Part One",
+
+        
+        
+        
+        "tags": [
+        
+            "cobalt",
+            
+        
+            "github",
+            
+        
+            "search",
+            
+        
+            "lunr",
+            
+        
+            "liquid"
+            
+        
+        ],
+        "href" : "2017/adding-search-to-your-cobalt-site-part-one/index.html",
+        "content" : "This will be a two part post, where I detail the steps it took to enablesearch on my Cobalt site.In this first post I will detail how to integrate lunrusing a manually created document collection. If you already know how to wireup lunr, you can skip to second post,where I create the document collection using a liquid template.I love blogs, but after the initial excitement of discovery you become curiousabout the blog author and if they have other posts of a similar topic. At thispoint you expect to have either a local search or some form of taxonomy.This is often a shortcoming of using a static site generator to power yourblog. It's great at producing pre-rendered static pages, but search or tagviews are the domain of a dynamic content management system.As the title of this blog post suggests, I will be looking to solve the problemof local search. I'll leave the subject of taxonomies for a future blog post.It turns out that we can approximate a resonable search experience usinglunr. lunr is a light weight implementation ofSolr the enterprise search platform (off theshelf search engine). With a little bit of jQuery and the lunr library we cancobble together a search page in Cobalt.My Cobalt source directory structureI've shared my own blog's structure as an way to refer to locations within aCobalt source directory..├── _drafts├── _layouts├── blog├── img└── jsThere should be no surprises here, our primary areas of interest will be thejs directory where javascript related assets live. And the root of thedirectory where my index, about and licenses pages live (all extending thedefault liquid template).search.liquidI placed my search template in the root of my Cobalt source and it looks likethis.frontmatterextends: default.liquidtitle: searchpath:  search/---contentThe general gist (pun intended) of the template is to create an text input boxand a hook for the results to appear in.The template is a copy of this gistfor getting lunr to work with hugo (anexcellent static site generator written in Go).It has some tweaks to get it working with lunr v2.1.0.&lt;input id=&quot;search&quot; type=&quot;text&quot; size=&quot;25&quot; placeholder=&quot;search for stuff here...&quot;        autofocus&gt;&lt;br /&gt;&lt;ul id=&quot;results&quot;&gt;&lt;/ul&gt;&lt;script type=&quot;text/javascript&quot;         src=&quot;https://code.jquery.com/jquery-2.1.3.min.js&quot;&gt;&lt;/script&gt;&lt;script type=&quot;text/javascript&quot; src=&quot;https://unpkg.com/lunr/lunr.js&quot;&gt;&lt;/script&gt;&lt;script type=&quot;text/javascript&quot;&gt;var lunrIndex,    $results,    pagesIndex;// This is pretty much a copy of // https://gist.github.com/sebz/efddfc8fdcb6b480f567// Initialize lunrjs using our generated index filefunction initLunr() {    // First retrieve the index file    $.getJSON(&quot;/js/lunr_docs.json&quot;)        .done(function(index) {            pagesIndex = index;            // Set up lunrjs by declaring the fields we use            // Also provide their boost level for the ranking            lunrIndex = lunr(function() {                this.field(&quot;title&quot;, {                    boost: 10                });                this.field(&quot;content&quot;);                // ref is the result item identifier (I chose the page URL)                this.ref(&quot;href&quot;);                                // Feed lunr with each file and let lunr actually index them                pagesIndex.forEach(function(page) {                    this.add(page)                }, this);            });                    })        .fail(function(jqxhr, textStatus, error) {            var err = textStatus + &quot;, &quot; + error;            console.error(&quot;Error getting cobalt index file:&quot;, err);        });}// Nothing crazy here, just hook up a listener on the input fieldfunction initUI() {    $results = $(&quot;#results&quot;);    $(&quot;#search&quot;).keyup(function() {        $results.empty();        // Only trigger a search when 2 chars. at least have been provided        var query = $(this).val();        if (query.length &lt; 2) {            return;        }        var results = search(query);        renderResults(results);    });}/**    * Trigger a search in lunr and transform the result    *    * @param  {String} query    * @return {Array}  results    */function search(query) {    // Find the item in our index corresponding to the lunr one to have more     // info    // Lunr result:     //  {ref: &quot;/section/page1&quot;, score: 0.2725657778206127}    // Our result:    //  {title:&quot;Page1&quot;, href:&quot;/section/page1&quot;, ...}    return lunrIndex.search(query).map(function(result) {            return pagesIndex.filter(function(page) {                return page.href === result.ref;            })[0];        });}/**    * Display the 10 first results    *    * @param  {Array} results to display    */function renderResults(results) {    if (!results.length) {        return;    }    // Only show the ten first results    results.slice(0, 10).forEach(function(result) {        var $result = $(&quot;&lt;li style=\\&quot;list-style:none;\\&quot;&gt;&quot;); // FUUUUUU!        $result.append($(&quot;&lt;a&gt;&quot;, {            href: result.href,            text: &quot;» &quot; + result.title        }));        $results.append($result);    });}// Let's get startedinitLunr();$(document).ready(function() {    initUI();});&lt;/script&gt;An artisanal lunr document collectionTo get my proof of concept going, I needed to feed lunr a distilled form of myblog posts, which I called lunr_docs.json and stored it in /js. In anearlier version of this post, I mistakenly referred to this as the lunr index.It's the data that will be used to generate lunr's index. The index hasdifferent structure that we'll learn about in part two.[{    &quot;title&quot;: &quot;Useful commit messages&quot;,    &quot;href&quot;: &quot;/2017/useful-commit-messages/&quot;,    &quot;content&quot;: &quot; Keeping a copy of this excellent bit of advice until I've committed (no pun) it to memory. &quot;}, {    &quot;title&quot;: &quot;Add reading time in Cobalt&quot;,    &quot;href&quot;: &quot;/2017/add-reading-time/&quot;,    &quot;content&quot;: &quot; I wanted to add an approximate reading time to each of my blog posts, like those seen in medium posts. &quot;}, {    &quot;title&quot;: &quot;Using a custom domain with GitHub Pages&quot;,    &quot;href&quot;: &quot;/2017/gh-pages-custom-domain/&quot;,    &quot;content&quot;: &quot; It took far too long to work out how to do this on the GitHub help pages... &quot;}, {    &quot;title&quot;: &quot;Using Cobalt with GitHub pages&quot;,    &quot;href&quot;: &quot;/2017/cobalt-github/&quot;,    &quot;content&quot;: &quot; It turns out using Cobalt and your personal GitHub page is a bit trickier to setup. Your personal GitHub page as oppose to your repo GitHub page, must have the content in the master branch. Repository/Project GitHub pages can live in a subdir of default branch i.e. docs &quot;}, {    &quot;title&quot;: &quot;MacBook Air Setup&quot;,    &quot;href&quot;: &quot;/2017/mba-setup/&quot;,    &quot;content&quot;: &quot; Here's my current setup for my MacBook Air Setup. I use a range of tools like homebrew, Visual Studio Code and vim. &quot;}]The format of the document collection is fairly trivial and only has a verysmall fragment of the blog post, which will affect searching.Incidentally the boost property for the title field in the search templateis probably superflorous as it's the only item being searched again. Theoriginal source for the code also utilised a tag field, and boost allowsyou to give a weighting for which field should be favoured when searching theindex.As you can imagine hand crafting an document collection is a bit lo-fi, so ifyou want to see what I used in the end (another liquid template), check outpart two of this blog post.Putting it all togetherOnce you've created the search template and the lunr index, all you need to dois perform your usual cobalt build workflow.If you've followed my structure, your search page can be found in /search.Search results should appear immediately as you start to type in the input box.But is it webscale?I have no idea, I don't have a large enough volume of data to test against.However lunr v2.x's lunr.Index.load function allows you to load a pre-builtindex, but this does add an extra of complexity. And at time of writing willrequire either node.js or some form of v8 context to generate it. The idea isthat you index the document collection and serialise the index generated.More details can be found here.Anything else?I'd love to remove the dependency on jQuery, but to be fair I can't be arsedto rewrite in vanilla js as it just works ™. Saying that, it has got methinking perhaps, I should create a liquid-rust extension (not sure if it'll bea tag, filter or other) to generate vanilla js for things that causes people toreach for jQuery.Also I have no idea why the damn input box is so small.Any guidence or help with either of these two issues would be greatlyappreciated.Updates2017-06-21 - Change references to the lunr index to the lunr documentcollection."
+    },
+
+
+    { 
+        "title" : "Useful commit messages",
+
+        
+        
+        
+        "tags": [
+        
+            "git"
+            
+        
+        ],
+        "href" : "2017/useful-commit-messages/index.html",
+        "content" : "Keeping a copy of this excellent bit of advice until I've committed (no pun) itto memory.feat: add hat wobble^--^  ^------------^|     ||     +-&gt; Summary in present tense.|+-------&gt; Type: chore, docs, feat, fix, refactor, style, or test.Source: https://seesparkbox.com/foundry/semantic_commit_messages"
+    },
+
+
+    { 
+        "title" : "Add reading time in Cobalt",
+
+        
+        
+        
+        "tags": [
+        
+            "cobalt",
+            
+        
+            "github",
+            
+        
+            "liquid"
+            
+        
+        ],
+        "href" : "2017/add-reading-time/index.html",
+        "content" : "I wanted to add an approximate reading time to each of my blog posts, likethose seen in medium posts. There's a lot of really nicejavascript libraries out that, but I kinda figured this defeat the whole purposeof using a static site generator.I was also looking for an excuse to use liquid (the template rendering enginefor Cobalt).It's a fairly simplistic approach, perform a word count and divide by 200 whichis the average of words read per min.{% assign reading_wpm = 200 %}{% assign word_count = content | split: &quot; &quot; | size %}{% assign reading_time = word_count | divided_by: 200 %}{% case reading_time %}{% when 0 %}  {% assign phrase = &quot;less than a minute.&quot; %}    {% when 1 %}  {% assign phrase = &quot;about a minute.&quot; %}    {% else %}  {% assign phrase = &quot; minutes.&quot; | prepend: reading_time %}    {% endcase %} Reading:{{ phrase }}It would appear I may have found a bug with the raw tag implementation inliquid-rs. I had to reverse theorder of my code to get it to appear as you see in this blog post!Bug report time!"
+    },
+
+
+    { 
+        "title" : "Using a custom domain with GitHub Pages",
+
+        
+        
+        
+        "tags": [
+        
+            "cobalt",
+            
+        
+            "github",
+            
+        
+            "dns"
+            
+        
+        ],
+        "href" : "2017/gh-pages-custom-domain/index.html",
+        "content" : "It took far too long to work out how to do this on the GitHub help pages...Assumptions:I've only tested for personal/user domain i.e. the doc root forhttp://USERNAME.github.io/.You've already have an A (APEX) record for your existing site.You've already got a CNAME record that points to the A record.InstructionsEnable custom domain in your repository (settings).Update your A record to point to IP addresses: 192.30.252.153 and192.30.252.154. Pro-tip: Switch your DNS management to cloudflare if you wantsuper fast switch from your old hosting to GitHub.echo &quot;your-domain-name&quot; &gt; CNAME in the default branch repo. This will besource if you're doing this for a Cobalt site."
+    },
+
+
+    { 
+        "title" : "Using Cobalt with GitHub pages",
+
+        
+        
+        
+        "tags": [
+        
+            "cobalt",
+            
+        
+            "github"
+            
+        
+        ],
+        "href" : "2017/cobalt-github/index.html",
+        "content" : "It turns out using Cobalt and yourpersonal GitHub page is a bit trickier to setup. Your personal GitHub page asoppose to your repo GitHub page, must have the content in the master branch.Repository/Project GitHub pages can live in a subdir of default branch i.e.docsThis is not a criticism of Cobalt, but rather myself demonstrating my lack ofgit prowess.The general gist of this how to, is that you place your Cobalt project in thesource branch and then use cobalt import --branch master to transfer therendered content to master.InstructionsCreate your user/personal page repo (USERNAME.github.io)Follow instructions for initialising a repogit -b checkout sourcecobalt init# do cobalty stuff..cobalt build# commit, maybe even push to sourcecobalt import --branch mastergit checkout master# commit, definitely pushIf you want to check out my setup you can find it here.Things I've not worked out yetThe build folder gets copied to the master branch during cobalt import.The folder doesn't contain any files. My work around at the moment is to add itto .gitignore in the master branch.Thanks to...Johann Hofmann for allowing me to copy hisblog's style (and his travis-ci auto deploy setup).Cobalt for creating this easy touse static site generator."
+    },
+
+
+    { 
+        "title" : "MacBook Air Setup",
+
+        
+        
+        
+        "tags": [
+        
+            "mac",
+            
+        
+            "homebrew",
+            
+        
+            "vscode",
+            
+        
+            "vim",
+            
+        
+            "setup"
+            
+        
+        ],
+        "href" : "2017/mba-setup/index.html",
+        "content" : "Here's my current setup for my MacBook Air Setup. I use a range of tools likehomebrew, Visual Studio Code and vim.homebrewbrew install \\        python python3 bash-git-prompt elixir figlet ffmpeg go httpie \\         imagemagick jq nmap zeromq reattach-to-user-namespace tmux sqlite \\         watch vim yarn youtube-dl doctlvscode extensionsgitlenshipsumInsert Date StringLiquid LanguagePrettyify JSONPython (Don's)vscode-rustvim plugins$ ls ~/.vim/bundle/go-explorer rust.vim    tagbar      vim-fugitive    vim-go      webapi-vimnerdtree    syntastic   tcomment_vim    vim-gitgutter   vim-racer"
+    },
+
+
+    { 
+        "title" : "Code generation scripts in PL/SQL",
+
+        
+        
+        
+        "tags": [
+        
+            "codegen",
+            
+        
+            "plsql",
+            
+        
+            "oracle",
+            
+        
+            "xml"
+            
+        
+        ],
+        "href" : "2017/flattening-xml/index.html",
+        "content" : "Flattening XML pathsThe table elephant_castle has a XMLTYPE column details that we want toget a list of distinct node paths.WITH node_list AS (    SELECT        x.*    FROM        elephant_castle ec        CROSS JOIN XMLTABLE ( 'declare function local:path-to-node( $nodes as node()* ) as xs:string* {     $nodes/string-join(ancestor-or-self::*/name(.),''/'') };for $i in $doc//*    let $node_path := local:path-to-node($i)      (: still don''t have a clue how this func works :)    let $node_value := $i/text()    where string-length($node_value) &gt; 0            (: how to exclude nodes without values :)    return &lt;data&gt;                &lt;path&gt;{$node_path}&lt;/path&gt;                &lt;value&gt;{$node_value}&lt;/value&gt;            &lt;/data&gt;'                PASSING ec.details AS &quot;doc&quot; COLUMNS                    node_path VARCHAR2(4000) PATH 'path',                    node_value VARCHAR2(4000) PATH 'value' /* debugging */            ) x) SELECT distinct nl.node_pathFROM    node_list nl;    Generate a query that combines existing fields with newly flatten XML pathsThis script allows you to apply boiler plate (fields from the existing tableusing the data dictionary) and then make call out to another sqlplus scriptthat contains table specific mappings. The call out script is assumed to becalled TableName.sql.REM Suppress all headings, page breaks, titlesSET PAGESIZE 0REM Do not list the text of a command before and after replacing substitution REM variables with valuesSET VERIFY OFFREM  Do not display the number of records returned (when rows &gt;= n )SET FEEDBACK OFFCLEAR SCREENDEFINE TableName=STANDINGORDERDEFINE TableAlias=soDEFINE TableSchema=BPHADMIN/********************************************************************************* Generate existing column list, excluding XMLTYPE, BLOB and CLOB types.*******************************************************************************/WITH column_list AS (    SELECT        column_id,        column_name    FROM        all_tab_cols    WHERE        owner = '&amp;TableSchema'    AND        table_name = '&amp;TableName'    AND        data_type NOT IN (            'XMLTYPE','BLOB','CLOB'        )    ORDER BY column_id) SELECT    CASE column_id          WHEN 1 THEN 'SELECT &amp;TableAlias'|| '.' || column_name        ELSE ',&amp;TableAlias'|| '.' || column_name    END as sqlFROM    column_list;/********************************************************************************* Call out script with custom XML flattening logic (usually field name tweaks)*******************************************************************************/@&amp;TableName/********************************************************************************* Add &quot;FROM&quot; statement*******************************************************************************/PROMPT FROM &amp;TableName &amp;TableAlias;;"
+    }
+
+]

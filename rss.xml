@@ -1,0 +1,63 @@
+<?xml version='1.0' encoding='UTF-8'?><rss version='2.0'><channel><title>booyaa&apos;s boggy bloggy</title><link>https://booyaa.wtf/</link><description>left intentionally blank</description><item><title>ORDS tips</title><link>https://booyaa.wtf/2017/ords/index.html</link><description>&lt;h2&gt;XML over ORDS&lt;/h2&gt;
+</description><guid>https://booyaa.wtf/2017/ords/index.html</guid><pubDate>Thu, 13 Jul 2017 15:36:58 +0100</pubDate></item><item><title>SSIS Variable Dispenser Template</title><link>https://booyaa.wtf/2017/variable-dispenser/index.html</link><description>&lt;p&gt;I don&apos;t write enough SSIS script blob tasks to commit this to memory. This is the safest way to access variables without inadvertantly locking them after a crash.&lt;/p&gt;
+</description><guid>https://booyaa.wtf/2017/variable-dispenser/index.html</guid><pubDate>Thu, 13 Jul 2017 15:36:58 +0100</pubDate></item><item><title>Add support for tags to Cobalt</title><link>https://booyaa.wtf/2017/cobalt-tags/index.html</link><description>&lt;p&gt;A while back I started adding a new front matter attribute to all my posts
+called &lt;code&gt;tags&lt;/code&gt;. I initially did this to improve my site search indexing (you can
+read about that &lt;a href=&quot;/2017/adding-search-to-your-cobalt-site-part-one/&quot;&gt;here&lt;/a&gt;).&lt;/p&gt;
+</description><guid>https://booyaa.wtf/2017/cobalt-tags/index.html</guid><pubDate>Sun,  9 Jul 2017 10:07:03 +0100</pubDate></item><item><title>Setting up exercism python track with Visual Studio Code</title><link>https://booyaa.wtf/2017/exercism-python/index.html</link><description>&lt;p&gt;Here&apos;s a fairly good setup for getting the python track of exercism working
+with virtual env and Visual Studio Code.&lt;/p&gt;
+</description><guid>https://booyaa.wtf/2017/exercism-python/index.html</guid><pubDate>Tue,  4 Jul 2017 17:08:41 +0100</pubDate></item><item><title>python tips</title><link>https://booyaa.wtf/2017/python/index.html</link><description>&lt;p&gt;A random collection of Python tips, I also write Python code in MacOS and
+raspbian so you&apos;ll see tips for those platforms.&lt;/p&gt;
+</description><guid>https://booyaa.wtf/2017/python/index.html</guid><pubDate>Tue,  4 Jul 2017 16:54:51 +0100</pubDate></item><item><title>youtube-dl gems</title><link>https://booyaa.wtf/2017/youtube-dl/index.html</link><description>&lt;p&gt;A handy collection of youtube-dl incantations, remember it&apos;s not just for
+youtube-dl! There&apos;s plenty more, but these are the one use I use on a daily
+basis.&lt;/p&gt;
+</description><guid>https://booyaa.wtf/2017/youtube-dl/index.html</guid><pubDate>Tue,  4 Jul 2017 16:42:14 +0100</pubDate></item><item><title>Adding an archive page to your Cobalt blog</title><link>https://booyaa.wtf/2017/adding-an-archive/index.html</link><description>&lt;p&gt;To avoid slowing down the index page, there&apos;s a point where you need to limit
+how many blog posts you want to appear on screen. This in turn presents another
+problem, how do you then provide a way to display older posts? Enter an archive
+page!&lt;/p&gt;
+</description><guid>https://booyaa.wtf/2017/adding-an-archive/index.html</guid><pubDate>Tue,  4 Jul 2017 16:13:01 +0100</pubDate></item><item><title>Flashback, what did this data look like previously?</title><link>https://booyaa.wtf/2017/flashback/index.html</link><description>&lt;p&gt;I&apos;m only scratching the surface of what you can do with flashbacks in Oracle.
+Our DBAs are absolute ninjas when it comes to using this witchcraft from Oracle.&lt;/p&gt;
+</description><guid>https://booyaa.wtf/2017/flashback/index.html</guid><pubDate>Sat,  1 Jul 2017 18:44:06 +0100</pubDate></item><item><title>SQL Developer&apos;s new format hints</title><link>https://booyaa.wtf/2017/sql-developer-format-hints/index.html</link><description>&lt;p&gt;One of my favourite cool features in SQL Developer is the ability to turn a sql
+query output into an entirely different format. It doesn&apos;t even require
+breaking out the import/export wizard.&lt;/p&gt;
+</description><guid>https://booyaa.wtf/2017/sql-developer-format-hints/index.html</guid><pubDate>Sat,  1 Jul 2017 18:40:24 +0100</pubDate></item><item><title>Bitmasks in SQL</title><link>https://booyaa.wtf/2017/bitmasks-sql/index.html</link><description>&lt;p&gt;bitmasks are really handy way to express predicates without becoming overly
+verbose with parens and logical operators (&lt;code&gt;AND&lt;/code&gt; and &lt;code&gt;OR&lt;/code&gt;). Assume we have the
+following table.&lt;/p&gt;
+</description><guid>https://booyaa.wtf/2017/bitmasks-sql/index.html</guid><pubDate>Sat,  1 Jul 2017 18:27:29 +0100</pubDate></item><item><title>Dirty Dynamic SQL</title><link>https://booyaa.wtf/2017-dirty-dynamic-sql/index.html</link><description>&lt;p&gt;Not all dynamic sql is strictly for immediate execution, nor is it dirty (I
+needed aninteresting title). I learnt this tricks from my friend at work, he&apos;s
+a big believer of using sql to code generate more sql.&lt;/p&gt;
+</description><guid>https://booyaa.wtf/2017-dirty-dynamic-sql/index.html</guid><pubDate>Sat,  1 Jul 2017 18:19:52 +0100</pubDate></item><item><title>When XML attacks!</title><link>https://booyaa.wtf/2017/when-xml-attacks/index.html</link><description>&lt;p&gt;At some point in your xml wrangling career you will hit an node whose data is
+too big for Oracle&apos;s &lt;code&gt;EXTRACTVALUE&lt;/code&gt; (I think the upper limit is 4000
+characters) and get this lovely message.&lt;/p&gt;
+</description><guid>https://booyaa.wtf/2017/when-xml-attacks/index.html</guid><pubDate>Sat,  1 Jul 2017 18:11:10 +0100</pubDate></item><item><title>Bind vs Substitution variables</title><link>https://booyaa.wtf/2017/bind-vs-substitution/index.html</link><description>&lt;p&gt;I always have difficulty remember the difference between these type of
+variables. Although now, that I&apos;ve started doing a lot of ORDS related work,
+the difference is become more apparent.&lt;/p&gt;
+</description><guid>https://booyaa.wtf/2017/bind-vs-substitution/index.html</guid><pubDate>Sat,  1 Jul 2017 18:02:45 +0100</pubDate></item><item><title>PL/SQL script to query a refcursor</title><link>https://booyaa.wtf/2017/plsql-script-cursors/index.html</link><description>&lt;p&gt;This will probably work in pipelined functions or packages too. Note the use of
+the bind variable to link the PL/SQL script variables to the out refcursor.&lt;/p&gt;
+</description><guid>https://booyaa.wtf/2017/plsql-script-cursors/index.html</guid><pubDate>Sat,  1 Jul 2017 16:49:01 +0100</pubDate></item><item><title>Defensive coding in SQL</title><link>https://booyaa.wtf/2017/defensive-coding-sql/index.html</link><description>&lt;p&gt;Always wrap ON clauses in parens to avoid predicates being deleted
+accidentally. The following code will scream if you delete the AND clause.&lt;/p&gt;
+</description><guid>https://booyaa.wtf/2017/defensive-coding-sql/index.html</guid><pubDate>Sat,  1 Jul 2017 16:33:04 +0100</pubDate></item><item><title>Collapsible Sections in HTML</title><link>https://booyaa.wtf/2017/collapsible-sections/index.html</link><description>&lt;h2&gt;But first a demo...&lt;/h2&gt;
+</description><guid>https://booyaa.wtf/2017/collapsible-sections/index.html</guid><pubDate>Sat,  1 Jul 2017 15:55:44 +0100</pubDate></item><item><title>See hidden files in Finder</title><link>https://booyaa.wtf/2017/hidden-files/index.html</link><description>&lt;p&gt;If you search for how to do this, you get a lot of nonsense involving messing with defaults write and horrific applescript bodges.&lt;/p&gt;
+</description><guid>https://booyaa.wtf/2017/hidden-files/index.html</guid><pubDate>Sat,  1 Jul 2017 14:21:50 +0100</pubDate></item><item><title>Using pre-built lunr indexes</title><link>https://booyaa.wtf/2017/prebuilt-lunr-indexes/index.html</link><description>&lt;p&gt;I&apos;ve implemented pre-built indexes vs. on demand i.e. generating them when the
+search page is being loaded. I&apos;m not entirely happy with the solution yet for
+the following reasons:&lt;/p&gt;
+</description><guid>https://booyaa.wtf/2017/prebuilt-lunr-indexes/index.html</guid><pubDate>Thu, 22 Jun 2017 19:21:00 +0100</pubDate></item><item><title>Useful git commmands</title><link>https://booyaa.wtf/2017/useful-git-commands/index.html</link><description>&lt;h2&gt;Commit logs&lt;/h2&gt;
+</description><guid>https://booyaa.wtf/2017/useful-git-commands/index.html</guid><pubDate>Thu, 22 Jun 2017 18:51:43 +0100</pubDate></item><item><title>Adding search to your cobalt site - Part Two</title><link>https://booyaa.wtf/2017/adding-search-to-your-cobalt-site-part-two/index.html</link><description>&lt;p&gt;This will be a two part post, where I detail the steps it took to enable
+search on my &lt;a href=&quot;https://github.com/cobalt-org/cobalt.rs&quot;&gt;Cobalt&lt;/a&gt; site.&lt;/p&gt;
+</description><guid>https://booyaa.wtf/2017/adding-search-to-your-cobalt-site-part-two/index.html</guid><pubDate>Tue, 20 Jun 2017 08:35:51 +0100</pubDate></item><item><title>Adding search to your cobalt site - Part One</title><link>https://booyaa.wtf/2017/adding-search-to-your-cobalt-site-part-one/index.html</link><description>&lt;p&gt;This will be a two part post, where I detail the steps it took to enable
+search on my &lt;a href=&quot;https://github.com/cobalt-org/cobalt.rs&quot;&gt;Cobalt&lt;/a&gt; site.&lt;/p&gt;
+</description><guid>https://booyaa.wtf/2017/adding-search-to-your-cobalt-site-part-one/index.html</guid><pubDate>Tue, 20 Jun 2017 08:06:11 +0100</pubDate></item><item><title>Useful commit messages</title><link>https://booyaa.wtf/2017/useful-commit-messages/index.html</link><description>&lt;p&gt;Keeping a copy of this excellent bit of advice until I&apos;ve committed (no pun) it
+to memory.&lt;/p&gt;
+</description><guid>https://booyaa.wtf/2017/useful-commit-messages/index.html</guid><pubDate>Fri, 16 Jun 2017 09:09:18 +0100</pubDate></item><item><title>Add reading time in Cobalt</title><link>https://booyaa.wtf/2017/add-reading-time/index.html</link><description>&lt;p&gt;I wanted to add an approximate reading time to each of my blog posts, like
+those seen in &lt;a href=&quot;https://medium.com&quot;&gt;medium&lt;/a&gt; posts. There&apos;s a lot of really nice
+javascript libraries out that, but I kinda figured this defeat the whole purpose
+of using a static site generator.&lt;/p&gt;
+</description><guid>https://booyaa.wtf/2017/add-reading-time/index.html</guid><pubDate>Thu, 15 Jun 2017 09:05:37 +0100</pubDate></item><item><title>Using a custom domain with GitHub Pages</title><link>https://booyaa.wtf/2017/gh-pages-custom-domain/index.html</link><description>&lt;p&gt;It took far too long to work out how to do this on the GitHub help pages...&lt;/p&gt;
+</description><guid>https://booyaa.wtf/2017/gh-pages-custom-domain/index.html</guid><pubDate>Tue, 13 Jun 2017 08:02:54 +0100</pubDate></item><item><title>Using Cobalt with GitHub pages</title><link>https://booyaa.wtf/2017/cobalt-github/index.html</link><description>&lt;p&gt;It turns out using &lt;a href=&quot;https://github.com/cobalt-org/cobalt.rs&quot;&gt;Cobalt&lt;/a&gt; and your
+personal GitHub page is a bit trickier to setup. Your personal GitHub page as
+oppose to your repo GitHub page, must have the content in the &lt;code&gt;master&lt;/code&gt; branch.
+Repository/Project GitHub pages can live in a subdir of default branch i.e.
+&lt;code&gt;docs&lt;/code&gt;&lt;/p&gt;
+</description><guid>https://booyaa.wtf/2017/cobalt-github/index.html</guid><pubDate>Sun, 11 Jun 2017 18:29:09 +0100</pubDate></item><item><title>MacBook Air Setup</title><link>https://booyaa.wtf/2017/mba-setup/index.html</link><description>&lt;p&gt;Here&apos;s my current setup for my MacBook Air Setup. I use a range of tools like
+homebrew, Visual Studio Code and vim.&lt;/p&gt;
+</description><guid>https://booyaa.wtf/2017/mba-setup/index.html</guid><pubDate>Sun,  4 Jun 2017 16:49:09 +0100</pubDate></item><item><title>Code generation scripts in PL/SQL</title><link>https://booyaa.wtf/2017/flattening-xml/index.html</link><description>&lt;h2&gt;Flattening XML paths&lt;/h2&gt;
+</description><guid>https://booyaa.wtf/2017/flattening-xml/index.html</guid><pubDate>Wed, 10 May 2017 16:49:09 +0100</pubDate></item></channel></rss>
